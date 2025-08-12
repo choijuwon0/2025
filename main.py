@@ -1,37 +1,42 @@
 import streamlit as st
 import random
 
-st.set_page_config(page_title="MBTI × 원피스 캐릭터 추천", layout="centered")
+st.set_page_config(page_title="MBTI × 하루 운세", layout="centered")
 
-st.title("MBTI로 어울리는 원피스 캐릭터 찾기 ☠️✨")
-st.write("MBTI를 선택하시면 어울리는 원피스 캐릭터를 추천해 드립니다. 모든 MBTI 유형이 준비되어 있습니다.")
+st.title("MBTI로 보는 오늘의 하루 운세 🔮")
+st.write("MBTI를 선택하시면 해당 성격 유형에 맞춘 오늘의 하루 운세를 알려드립니다.")
 
-MBTI_DB = {
-    "INTJ": {"desc": "전략적이며 계획적인 완벽주의자입니다.", "chars": [{"name": "Nico Robin", "anime": "One Piece", "why": "지식과 전략에 능숙합니다.", "img": "https://upload.wikimedia.org/wikipedia/en/9/95/Nico_Robin.png"}]},
-    "INFP": {"desc": "이상주의적이고 따뜻한 마음을 지녔습니다.", "chars": [{"name": "Chopper", "anime": "One Piece", "why": "순수하고 동료애가 강합니다.", "img": "https://upload.wikimedia.org/wikipedia/en/0/0c/Tony_Tony_Chopper.png"}]},
-    "ENFP": {"desc": "열정적이고 모험을 좋아합니다.", "chars": [{"name": "Luffy", "anime": "One Piece", "why": "자유롭고 즐겁게 살아갑니다.", "img": "https://upload.wikimedia.org/wikipedia/en/2/29/Monkey_D_Luffy.png"}]},
-    "ENTJ": {"desc": "지도력이 뛰어나고 목표 지향적입니다.", "chars": [{"name": "Donquixote Doflamingo", "anime": "One Piece", "why": "강력한 카리스마와 리더십을 보입니다.", "img": "https://upload.wikimedia.org/wikipedia/en/0/0e/Donquixote_Doflamingo.png"}]},
-    "ISTP": {"desc": "실용적이고 문제 해결에 능숙합니다.", "chars": [{"name": "Roronoa Zoro", "anime": "One Piece", "why": "침착하고 강인한 해결사입니다.", "img": "https://upload.wikimedia.org/wikipedia/en/6/6f/Roronoa_Zoro.png"}]}
+MBTI_UNSE = {
+    "INTJ": "계획했던 일이 순조롭게 진행됩니다. 세부 사항까지 신경 쓰면 좋은 성과가 있습니다.",
+    "INFP": "따뜻한 하루가 펼쳐집니다. 주변 사람과의 관계에서 기분 좋은 일이 생깁니다.",
+    "ENFP": "새로운 기회와 만남이 찾아옵니다. 열린 마음으로 맞이하세요.",
+    "ENTJ": "리더십을 발휘할 순간이 옵니다. 결단력이 빛나는 하루가 될 것입니다.",
+    "ISTP": "문제 해결 능력이 돋보입니다. 침착하게 대응하면 좋은 결과를 얻습니다.",
+    "ISFJ": "누군가를 도우면 그 복이 곧 돌아옵니다.",
+    "ESFP": "활기차고 즐거운 하루입니다. 긍정적인 에너지를 마음껏 나누세요.",
+    "ESTJ": "목표에 집중하면 성과를 거둘 수 있는 날입니다.",
+    "ENTP": "창의적인 아이디어가 빛을 발합니다. 자유롭게 표현하세요.",
+    "INFJ": "깊은 통찰력이 발휘되는 하루입니다. 중요한 결정을 내리기 좋습니다.",
+    "ISFP": "감성이 풍부해집니다. 예술적 영감을 받기 좋은 날입니다.",
+    "ESTP": "도전이 행운을 부릅니다. 새로운 시도를 해보세요.",
+    "ESFJ": "협력이 순조롭습니다. 서로 도움을 주고받으며 발전합니다.",
+    "ISTJ": "성실함이 보상받는 하루입니다. 꾸준함이 빛납니다."
 }
 
-mbti_list = sorted(MBTI_DB.keys())
+mbti_list = sorted(MBTI_UNSE.keys())
 selected = st.selectbox("MBTI를 선택해 주세요", ["선택 없음"] + mbti_list)
 
 if selected != "선택 없음":
-    data = MBTI_DB[selected]
-    st.subheader(f"{selected} — 성격 요약")
-    st.write(data["desc"])
-    st.markdown("---")
-    st.subheader("추천 캐릭터")
-
-    for c in data["chars"]:
-        st.image(c["img"], width=200, caption=f"{c['name']} — {c['anime']}")
-        st.write(f"이유: {c['why']}")
-        st.markdown("---")
-
-    if st.button("랜덤 추천 받기 🎲"):
-        pick = random.choice(data["chars"])
-        st.success(f"추천: {pick['name']} ({pick['anime']}) — {pick['why']}")
-        st.image(pick["img"], width=200, caption=f"{pick['name']} — {pick['anime']}")
+    st.subheader(f"{selected} — 오늘의 하루 운세")
+    st.write(MBTI_UNSE[selected])
+    if st.button("랜덤 하루 조언 받기 🎲"):
+        advice_list = [
+            "긍정적인 마음이 좋은 기운을 부릅니다.",
+            "작은 친절이 큰 행운이 됩니다.",
+            "오늘은 과감한 결정을 해보세요.",
+            "휴식을 취하며 에너지를 회복하세요.",
+            "좋은 사람과의 대화가 큰 영감을 줍니다."
+        ]
+        st.success(random.choice(advice_list))
 else:
-    st.info("MBTI를 선택하시면 원피스 캐릭터를 추천해 드립니다.")
+    st.info("MBTI를 선택하시면 오늘의 하루 운세를 알려드립니다.")
