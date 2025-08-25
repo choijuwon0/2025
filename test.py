@@ -3,9 +3,10 @@ from datetime import datetime, timedelta
 import pandas as pd
 import time
 
+# 페이지 기본 설정 (제목, 아이콘, 레이아웃)
 st.set_page_config(page_title="건강 체크 프로그램", page_icon="🩺", layout="wide")
 
-# CSS 스타일
+# CSS 스타일 적용 (배경, 카드 디자인, 강조 색상 등)
 st.markdown("""
     <style>
     body {
@@ -36,19 +37,21 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# 타이틀 출력
 st.markdown("<div class='title'>🩺 건강 체크 프로그램</div>", unsafe_allow_html=True)
 
-# 기본 정보
+# ---------------- 기본 정보 입력 ----------------
 with st.container():
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown("### 👤 기본 정보")
     col1, col2 = st.columns(2)
     with col1:
-        age = st.number_input("나이", min_value=1, max_value=120, value=25)
+        age = st.number_input("나이", min_value=1, max_value=120, value=25)  # 나이 입력
     with col2:
-        gender = st.selectbox("성별", ["남성", "여성"])
+        gender = st.selectbox("성별", ["남성", "여성"])  # 성별 선택
     st.markdown("</div>", unsafe_allow_html=True)
 
+# 성별에 따라 권장 수분 섭취량 다르게 설정
 if gender == "남성":
     water_min, water_max = 2500, 3000
     water_text = "2500~3000ml (≈ 5~6컵, 2.5~3L)"
@@ -56,55 +59,66 @@ else:
     water_min, water_max = 2000, 2500
     water_text = "2000~2500ml (≈ 4~5컵, 2~2.5L)"
 
-# 입력 카드
+# ---------------- 생활 습관 입력 ----------------
 with st.container():
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown("### 📝 생활 습관 입력")
     col1, col2 = st.columns(2)
     with col1:
-        sleep_start = st.time_input("🛏️ 잠든 시간", value=datetime.strptime("23:00", "%H:%M").time())
-        meal_regular = st.selectbox("🍚 식사 규칙성", ["항상 규칙적", "가끔 불규칙", "매우 불규칙"])
-        stress = st.slider("😥 스트레스 (0=없음, 10=심함)", 0, 10, 5)
+        sleep_start = st.time_input("🛏️ 잠든 시간", value=datetime.strptime("23:00", "%H:%M").time())  # 수면 시작 시간
+        meal_regular = st.selectbox("🍚 식사 규칙성", ["항상 규칙적", "가끔 불규칙", "매우 불규칙"])  # 식사 패턴
+        stress = st.slider("😥 스트레스 (0=없음, 10=심함)", 0, 10, 5)  # 스트레스 정도
     with col2:
-        sleep_end = st.time_input("⏰ 일어난 시간", value=datetime.strptime("07:00", "%H:%M").time())
-        exercise = st.selectbox("🏃 운동 횟수(주)", ["0회", "1~2회", "3회 이상"])
-        water_ml = st.number_input("💧 하루 물 섭취량 (ml)", min_value=0, max_value=10000, value=2000, step=100)
+        sleep_end = st.time_input("⏰ 일어난 시간", value=datetime.strptime("07:00", "%H:%M").time())  # 기상 시간
+        exercise = st.selectbox("🏃 운동 횟수(주)", ["0회", "1~2회", "3회 이상"])  # 주간 운동 횟수
+        water_ml = st.number_input("💧 하루 물 섭취량 (ml)", min_value=0, max_value=10000, value=2000, step=100)  # 하루 물 섭취량
     st.markdown("</div>", unsafe_allow_html=True)
 
-# 수면 계산
+# ---------------- 수면 시간 계산 ----------------
 sleep_duration = None
 if sleep_start and sleep_end:
     start_dt = datetime.combine(datetime.today(), sleep_start)
     end_dt = datetime.combine(datetime.today(), sleep_end)
     if end_dt <= start_dt:
-        end_dt += timedelta(days=1)
-    sleep_duration = (end_dt - start_dt).seconds / 3600
+        end_dt += timedelta(days=1)  # 자정 이후 기상 고려
+    sleep_duration = (end_dt - start_dt).seconds / 3600  # 수면 시간(시간 단위) 계산
 
-# 버튼
+# ---------------- 버튼 클릭 시 건강 상태 평가 ----------------
 if st.button("📊 건강 상태 체크하기", use_container_width=True):
-    score = 0
+    score = 0  # 점수 초기화
+    
+    # 수면 평가
     if sleep_duration is not None:
         if 7 <= sleep_duration <= 9: score += 2
         elif 5 <= sleep_duration < 7 or 9 < sleep_duration <= 10: score += 1
+    
+    # 식사 평가
     if meal_regular == "항상 규칙적": score += 2
     elif meal_regular == "가끔 불규칙": score += 1
+    
+    # 운동 평가
     if exercise == "3회 이상": score += 2
     elif exercise == "1~2회": score += 1
+    
+    # 수분 섭취 평가
     if water_min <= water_ml <= water_max: score += 2
     elif (water_min - 500) <= water_ml < water_min or water_max < water_ml <= (water_max + 500): score += 1
+    
+    # 스트레스 평가
     if stress <= 3: score += 2
     elif stress <= 6: score += 1
 
-    # 결과 카드
+    # ---------------- 건강 상태 결과 ----------------
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.subheader("📊 건강 상태 결과")
 
-    # 애니메이션 progress bar
+    # 프로그래스바 애니메이션 효과
     progress = st.progress(0)
     for i in range(int(score * 10)):
         time.sleep(0.02)
         progress.progress(i / 100)
 
+    # 점수에 따른 결과 메시지
     if score >= 8:
         st.success("✅ 건강 상태가 매우 좋습니다! 🎉 현재 생활습관을 유지하세요.")
     elif score >= 5:
@@ -113,15 +127,15 @@ if st.button("📊 건강 상태 체크하기", use_container_width=True):
         st.error("🚨 건강에 주의가 필요합니다! 생활 습관을 개선하세요.")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # 비교표
+    # ---------------- 표준 수치와 비교 ----------------
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.subheader("📋 표준 정상 수치와 비교")
-    water_cups = water_ml / 500
-    water_l = water_ml / 1000
+    water_cups = water_ml / 500  # 물을 컵 단위로 환산
+    water_l = water_ml / 1000    # 물을 리터 단위로 환산
     data = {
         "항목": ["수면 🛏️", "식사 🍚", "운동 🏃", "수분 💧", "스트레스 😥"],
         "내 상태": [
-            f"{sleep_duration:.1f} 시간" if sleep_duration else "입력 없음",
+            f"{sleep_duration:.1f} 시간" if sleep_duration else "입력 없음",  # 실제 입력값
             meal_regular,
             exercise,
             f"{water_ml} ml (≈ {water_cups:.1f}컵, {water_l:.1f}L)",
@@ -135,10 +149,10 @@ if st.button("📊 건강 상태 체크하기", use_container_width=True):
             "0~3 (낮을수록 좋음)"
         ]
     }
-    st.table(pd.DataFrame(data))
+    st.table(pd.DataFrame(data))  # 비교 표 출력
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # 개선 방안 카드
+    # ---------------- 개선 방안 & 기대 효과 ----------------
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.subheader("💡 개선 방안 & 기대 효과")
     if sleep_duration and sleep_duration < 7:
